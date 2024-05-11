@@ -2,7 +2,7 @@
 Projeto Imersão IA Alura
 
 ### Descrição
-## AI For All é um projeto que visa universalizar o acesso à inteligência artificial através de cinco robôs especializados: Doctor Robot, Teacher Robot, Nature Robot, Excel Robot e Chef Robot. Cada robô é projetado para auxiliar em tarefas específicas, abrangendo áreas como saúde, educação, meteorologia, análise de dados e culinária.
+## AI For All é um projeto que visa universalizar de uma maneira mais simples o acesso à inteligência artificial através de cinco robôs especializados: Doctor Robot, Teacher Robot, Nature Robot, Excel Robot e Chef Robot. Cada robô é projetado para auxiliar em tarefas específicas, abrangendo áreas como saúde, educação, meteorologia, análise de dados e culinária.
 
 ## Capturas de Tela
 ### Página Inicial (Index):
