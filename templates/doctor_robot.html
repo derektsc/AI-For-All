@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Robot</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        #load {
+            width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center; /* Centraliza o texto dentro da div */
+            }
+
+            #load h1 {
+            color: #333; /* Cor do título */
+            margin-bottom: 10px;
+            }
+
+            #load p { /* Estilo para "Anexe o pedido médico (exames)" */
+            font-size: 14px; 
+            color: black; /* Cor do texto cinza escuro */
+            margin-bottom: 20px; 
+            }
+        #pdf-form {
+          width: 400px;
+          margin: 50px auto;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        }
+    
+        #pdf-form label {
+          display: block;
+          margin-bottom: 10px;
+        }
+    
+        #pdf_file {
+          display: none; /* Esconder o input padrão */
+        }
+    
+        /* Estilo para o botão "Escolher arquivo" */
+        .file-upload-button {
+          background-color: #4CAF50; /* Cor de fundo verde */
+          color: white; /* Cor do texto branca */
+          padding: 10px 20px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.3s ease; /* Transição suave para cor de fundo */
+        }
+    
+        .file-upload-button:hover {
+          background-color: #45a049; /* Cor de fundo verde mais escura ao passar o mouse */
+        }
+    
+        /* Estilo para o botão "Enviar" */
+        #pdf-form input[type="submit"] {
+          background-color: #008CBA; /* Cor de fundo azul */
+          color: white; /* Cor do texto branca */
+          padding: 10px 20px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.3s ease; /* Transição suave para cor de fundo */
+        }
+    
+        #pdf-form input[type="submit"]:hover {
+          background-color: #0077a3; /* Cor de fundo azul mais escura ao passar o mouse */
+        }
+    </style>
+    <!-- Google Fonts Link For Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
+   <!-- <script src="{{ url_for('static', filename='js/script.js')}}" defer></script> -->
+</head>
+<body>
+
+    <header class="header">
+        <h1>Doctor Robot</h1>
+        <p>Faça o upload de PDF's para que o Gemini analise o conteúdo e disserte sobre</p>
+        <ul class="nav-linkss">
+            <li><a href="index.html">Home</a></li>
+            <li class="center"><a href="#">GitHub</a></li>
+            <li class="upward"><a href="#">Sobre</a></li>
+            <li class="forward"><a href="#">Linkedin</a></li>
+        </ul>
+    </header>
+
+    <main class="main" style="background-color:  #d6b9b9;">
+        <div class="content-wrapper">
+            <div class="container">
+                <div id="load">
+                <h1>Carregar Arquivo PDF</h1>
+                <p><strong>Anexe o pedido médico (exames)</strong></p>
+                <form method="post" enctype="multipart/form-data" id="pdf-form">
+                    <label for="pdf_file">Escolha o arquivo:</label>
+                
+                    <!-- Botão "Escolher arquivo" com label conectado ao input -->
+                    <label for="pdf_file" class="file-upload-button">
+                      Escolher arquivo
+                    </label>
+                    <input type="file" id="pdf_file" name="pdf_file">
+                    <span id="file-chosen">Nenhum arquivo escolhido</span>
+                
+                    <input type="submit" value="Enviar">
+                </form>
+                </div>
+                {% if erro_msg %}
+                    <p class="error">Erro: {{ erro_msg }}</p>
+                {% endif %}
+                {% if text_content %}
+                    <div class="pdf-info">
+                    <!-- <h3>Informações do PDF:</h3>
+                        <p>Número de Páginas: {{ num_pages }}</p>
+                        <p>Conteúdo do Texto:</p>
+                        <pre>{{ text_content }}</pre> -->
+                        <h3>Analise do Gemini:</h3>
+                        <p><strong>Lembrando que após o resultado abaixo, você pode questionar o Gemini clicando no chat a direita.</strong></p>
+                        <pre>{{ generated_text }}</pre>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+    <button class="chatbot-toggler">
+        <span class="material-symbols-rounded">mode_comment</span>
+        <span class="material-symbols-outlined">close</span>
+    </button>
+    <div class="chatbot">
+        <header>
+            <h2>Doctor Robot</h2>
+            <span class="close-btn material-symbols-outlined">close</span>
+        </header>
+        <ul class="chatbox">
+          <li class="chat incoming">
+            <span class="material-symbols-outlined">smart_toy</span>
+            <p>Bem vindo 👋<br>Como posso te ajudar hoje?</p>
+          </li>
+        </ul>
+        <div class="chat-input">
+          <textarea placeholder="Digite uma mensagem..." spellcheck="false" required></textarea>
+          <span id="send-btn" class="material-symbols-rounded">send</span>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Site criado por <strong>Derek Barragão</strong> para Projeto <strong>Imersão IA Alura</strong></p>
+    </footer>
+
+<script>
+    const fileInput = document.getElementById('pdf_file');
+    const fileChosen = document.getElementById('file-chosen');
+
+    fileInput.addEventListener('change', function(e) {
+      const fileName = e.target.files[0].name;
+      fileChosen.textContent = fileName;
+    });
+    const chatbotToggler = document.querySelector(".chatbot-toggler");
+    const fecharChatBot = document.querySelector(".close-btn");
+    const chatbox = document.querySelector(".chatbox");
+    const chatInput = document.querySelector(".chat-input textarea");
+    const sendChatBtn = document.querySelector(".chat-input span");
+    const pdfForm = document.getElementById('pdf-form'); // Novo seletor para o formulário
+
+    let userMessage = null;
+    const inputInitHeight = chatInput.scrollHeight;
+
+    const createChatLi = (message, className) => {
+        const chatLi = document.createElement("li");
+        chatLi.classList.add("chat", `${className}`);
+        let chatContent = className === "outgoing" 
+            ? `<p></p>` 
+            : `<span class="material-symbols-outlined">smart_toy</span><p></p>`; 
+        chatLi.innerHTML = chatContent;
+        chatLi.querySelector("p").textContent = message;
+        return chatLi;
+    }
+
+    const handleChat = () => {
+        userMessage = chatInput.value.trim();
+        if (!userMessage) return; 
+        chatInput.value = "";
+        chatInput.style.height = `${inputInitHeight}px`;
+        chatbox.appendChild(createChatLi(userMessage, "outgoing"));
+        chatbox.scrollTo(0, chatbox.scrollHeight);
+
+        fetch('/chatbot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensagem: userMessage })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const incomingChatLi = createChatLi(data.resposta, "incoming");
+            chatbox.appendChild(incomingChatLi);
+            chatbox.scrollTo(0, chatbox.scrollHeight);
+        });
+    };
+
+    // Adicione este bloco de código dentro da tag <script>
+    pdfForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const fileInput = document.getElementById('pdf_file');
+        const file = fileInput.files[0];
+
+        if (file && file.type === 'application/pdf') {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const pdfText = e.target.result;
+
+                // Envia o texto do PDF para o endpoint /chatbot
+                fetch('/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mensagem: "upload:" + pdfText, resposta_gemini})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const incomingChatLi = createChatLi(data.resposta, "incoming");
+                    chatbox.appendChild(incomingChatLi);
+                    chatbox.scrollTo(0, chatbox.scrollHeight);
+                    // Exibe a resposta do Gemini na área de análise do PDF
+                    document.querySelector('.pdf-info pre').textContent = data.resposta
+                })
+                
+                .catch(error => console.error('Erro ao enviar o PDF:', error));
+            };
+
+            reader.readAsText(file);
+            pdfForm.submit();  // Remove o `event.preventDefault()`
+        } else {
+            alert('Por favor, selecione um arquivo PDF.');
+        }
+    });
+
+    chatInput.addEventListener("input", () => {
+        chatInput.style.height = `${inputInitHeight}px`;
+        chatInput.style.height = `${chatInput.scrollHeight}px`;
+    });
+
+    chatInput.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
+            e.preventDefault();
+            handleChat();
+        }
+    });
+
+    sendChatBtn.addEventListener("click", handleChat);
+    fecharChatBot.addEventListener("click", () => document.body.classList.remove("show-chatbot")); 
+    chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot")); 
+</script>
+
+</body>
+</html>

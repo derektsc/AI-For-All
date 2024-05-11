@@ -1,0 +1,16 @@
+Localização: Los Angeles
+Temperatura: 21.5°C
+Umidade: 63%
+Vento: 5.66 m/s
+Descrição: clear sky
+Precipitação: 0 mm
+Alertas: Sem alertas.
+--------------------
+Localização: buenos aires
+Temperatura: 13.24°C
+Umidade: 74%
+Vento: 8.05 m/s
+Descrição: broken clouds
+Precipitação: 0 mm
+Alertas: Sem alertas.
+--------------------

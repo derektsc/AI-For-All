@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nature Robot</title>
+    <link rel="stylesheet" href="../static/nature.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Google Fonts Link For Icons -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
+</head>
+
+<body>
+    <header>
+        <h1>Nature Robot</h1>
+        <p>Interaja com o Gemini para saber sobre o clima</p>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li class="center"><a href="#">GitHub</a></li>
+            <li class="upward"><a href="#">Sobre</a></li>
+            <li class="forward"><a href="#">Linkedin</a></li>
+        </ul>
+    </header>
+    <main>
+        <div id="chatbot-container"> 
+            <div id="chatbot-nature">
+                <h2>Insira a Cidade</h2>
+                <div id="chat-messages-nature"></div>
+                <input type="text" id="user-input-nature" placeholder="Digite a cidade...">
+                <button id="send-button" onclick="sendMessageToNatureBot()">Enviar</button>
+            </div>
+
+            <div id="chatbot-analise">
+                <h2>Nature Robot</h2>
+                <div id="chat-messages-analise"></div>
+                <input type="text" id="user-input-analise" placeholder="Digite sua mensagem...">
+                <button id="send-button" onclick="sendMessageToAnaliseBot(document.getElementById('user-input-analise').value)">Enviar</button>
+            </div>
+        </div>
+        <div id="map"></div> 
+    </main>
+    <footer>
+        <p>Site criado por <strong>Derek Barragão</strong> para Projeto <strong>Imersão IA Alura</strong></p>
+    </footer>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        document.getElementById('user-input-nature').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                sendMessageToNatureBot();
+            }
+        });
+
+        document.getElementById('user-input-analise').addEventListener('keyup', function (event) {
+            if (event.key === 'Enter') {
+                sendMessageToAnaliseBot(document.getElementById('user-input-analise').value);
+            }
+        });
+
+        let map;
+
+        function sendMessageToNatureBot() {
+            let userInput = document.getElementById('user-input-nature').value;
+            document.getElementById('user-input-nature').value = "";
+
+            let chatMessagesNature = document.getElementById('chat-messages-nature');
+            let userMessageElement = document.createElement('div');
+            userMessageElement.classList.add('user-message');
+            userMessageElement.textContent = userInput;
+            chatMessagesNature.appendChild(userMessageElement);
+
+            fetch('/nature_chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'mensagem': userInput })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    let botMessageElement = document.createElement('div');
+                    botMessageElement.classList.add('bot-message');
+                    botMessageElement.textContent = data.resposta;
+                    chatMessagesNature.appendChild(botMessageElement);
+
+                    // Envia a resposta do Nature Bot para o Analise Bot
+                    sendMessageToAnaliseBot(data.resposta);
+
+                    updateMap(userInput);
+                });
+        }
+
+        function sendMessageToAnaliseBot(mensagemUsuario) {
+            let chatMessagesAnalise = document.getElementById('chat-messages-analise');
+            let userMessageElement = document.createElement('div');
+            userMessageElement.classList.add('user-message');
+            userMessageElement.textContent = mensagemUsuario;
+            chatMessagesAnalise.appendChild(userMessageElement);
+
+            document.getElementById('user-input-analise').value = "";
+
+            // Envia a mensagem para /analise_chatbot
+            fetch('/analise_chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'mensagem': mensagemUsuario })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Exibe a resposta do Analise Bot
+                    let botMessageElement = document.createElement('div');
+                    botMessageElement.classList.add('bot-message');
+                    botMessageElement.textContent = data.resposta;
+                    chatMessagesAnalise.appendChild(botMessageElement);
+                });
+        }
+
+        function updateMap(localizacao) {
+            // URL da API de geocodificação do OpenStreetMap
+            let geocodingUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${localizacao}`;
+
+            // Fazer a requisição para a API
+            fetch(geocodingUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Obter as coordenadas do primeiro resultado
+                        let lat = data[0].lat;
+                        let lon = data[0].lon;
+
+                        // Criar o mapa se ele não existir
+                        if (!map) {
+                            map = L.map('map').setView([lat, lon], 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '© OpenStreetMap contributors'
+                            }).addTo(map);
+                        } else {
+                            // Centralizar o mapa nas coordenadas obtidas
+                            map.setView([lat, lon], 13);
+                        }
+                    } else {
+                        // Lidar com o caso em que a localização não foi encontrada
+                        console.error("Localização não encontrada:", localizacao);
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao obter coordenadas:", error);
+                });
+        }
+
+    </script>
+
+</body>
+
+</html>

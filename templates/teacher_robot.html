@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Robot</title>
+    <link rel="stylesheet" href="../static/teacher.css">
+    <!-- Google Fonts Link For Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
+</head>
+<body>
+    <header>
+        <h1>Teacher Robot</h1>
+        <p>Interaja com o Gemini para fins de estudos</p>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li class="center"><a href="#">GitHub</a></li>
+            <li class="upward"><a href="#">Sobre</a></li>
+            <li class="forward"><a href="#">Linkedin</a></li>
+        </ul>
+    </header>
+    <main>
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>Teacher Robot</h2>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Mensagens do chat serão adicionadas aqui -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-input-text" placeholder="Digite sua mensagem...">
+                <button id="chat-submit">Enviar</button>
+                <input type="file" id="file-upload">
+                <button id="upload-button">
+                    <span class="material-symbols-outlined">attach_file</span>
+                </button>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>Site criado por <strong>Derek Barragão</strong> para Projeto <strong>Imersão IA Alura</strong></p>
+    </footer>
+    <script>
+        // Script para lidar com o envio de mensagens e arquivos
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input-text');
+        const chatSubmit = document.getElementById('chat-submit');
+        const fileUpload = document.getElementById('file-upload');
+        const uploadButton = document.getElementById('upload-button');
+
+        // Função para adicionar uma nova mensagem ao chat
+        function addMessage(message, sender, fileName) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `${sender}-message`);
+            
+            if (fileName) {
+                messageDiv.textContent = `${message} (${fileName})`;
+            } else {
+                messageDiv.textContent = message;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Manipulador de evento para enviar mensagens de texto
+        chatSubmit.addEventListener('click', () => {
+            sendMessage();
+        });
+
+        // Manipulador de evento para a tecla "Enter"
+        chatInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Função para enviar a mensagem
+        function sendMessage() {
+            const message = chatInput.value;
+            if (message.trim() !== '') {
+                addMessage(message, 'user');
+                // Enviar a mensagem para a rota /teacher_chatbot
+                fetch('/teacher_chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mensagem: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addMessage(data.resposta, 'bot');
+                });
+                chatInput.value = '';
+            }
+        }
+
+        // Manipulador de evento para abrir o diálogo de upload de arquivo
+        uploadButton.addEventListener('click', () => {
+            fileUpload.click();
+        });
+
+        // Manipulador de evento para lidar com o upload de arquivo
+        fileUpload.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const fileContent = e.target.result; // Data URL do PDF
+            addMessage('Arquivo enviado:', 'user', file.name);
+
+            let messagePrefix = "upload_pdf:";
+            if (file.type.startsWith("image/")) {
+                messagePrefix = "upload_imagem:";
+            }
+
+            fetch('/teacher_chatbot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ mensagem: `${messagePrefix}${fileContent}` }) // Envia o Data URL completo
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage(data.resposta, 'bot');
+            });
+        };
+
+        if (file.type === "application/pdf") {
+            reader.readAsDataURL(file); // Leia como data URL para PDFs
+        } else if (file.type.startsWith("image/")) {
+            reader.readAsDataURL(file); // Leia como data URL para imagens
+        } else {
+            addMessage("Tipo de arquivo não suportado.", 'bot');
+        }
+    }
+});
+    </script>
+</body>
+</html>
