@@ -14,3 +14,35 @@ Descrição: broken clouds
 Precipitação: 0 mm
 Alertas: Sem alertas.
 --------------------
+Localização: California
+Temperatura: 14.89°C
+Umidade: 60%
+Vento: 3.6 m/s
+Descrição: overcast clouds
+Precipitação: 0 mm
+Alertas: Sem alertas.
+--------------------
+Localização: Buenos Aires
+Temperatura: 12.66°C
+Umidade: 75%
+Vento: 8.05 m/s
+Descrição: scattered clouds
+Precipitação: 0 mm
+Alertas: Sem alertas.
+--------------------
+Localização: Toronto
+Temperatura: 10.9°C
+Umidade: 79%
+Vento: 4.12 m/s
+Descrição: overcast clouds
+Precipitação: 0 mm
+Alertas: Sem alertas.
+--------------------
+Localização: buenos aires
+Temperatura: 12.38°C
+Umidade: 75%
+Vento: 8.05 m/s
+Descrição: scattered clouds
+Precipitação: 0 mm
+Alertas: Sem alertas.
+--------------------

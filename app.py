@@ -16,7 +16,7 @@ from PIL import Image # Importe a biblioteca PIL para lidar com imagens
 # Configure o caminho para o executável do Tesseract (ajuste para o seu sistema)
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-GOOGLE_API_KEY="AIzaSyCv-j5gPD45OX9MMql1aefQO6Jtsf8CuUU"
+GOOGLE_API_KEY=""
 genai.configure(api_key=GOOGLE_API_KEY)
 
 generation_config = {
@@ -224,7 +224,7 @@ def teacher_chatbot():
 # Função obter dados clima:
 
 def obter_dados_clima(localizacao):
-    api_key = "017bf4e06aec85a114988450ca982f3a" # SUBSTITUA PELA SUA CHAVE API_KEY
+    api_key = "" # SUBSTITUA PELA SUA CHAVE API_KEY
     base_url = "http://api.openweathermap.org/data/2.5/weather?"
 
     url = f"{base_url}appid={api_key}&q={localizacao}"
